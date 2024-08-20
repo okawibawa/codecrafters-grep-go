@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -41,19 +42,22 @@ func matchLine(line []byte, pattern string) (bool, error) {
 		return false, fmt.Errorf("unsupported pattern: %q", pattern)
 	}
 
-	var ok bool
-
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 
 	// Uncomment this to pass the first stage
+
 	if pattern == "\\d" {
-		ok = bytes.ContainsAny(line, "0123456789")
-	} else if pattern == "\\w" {
-		ok = bytes.ContainsAny(line, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
-	} else {
-		ok = bytes.ContainsAny(line, pattern)
+		return bytes.ContainsAny(line, "0123456789"), nil
 	}
 
-	return ok, nil
+	if pattern == "\\w" {
+		return bytes.ContainsAny(line, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"), nil
+	}
+
+	if strings.HasPrefix(pattern, "[") {
+		return bytes.ContainsAny(line, pattern[1:len(pattern)-1]), nil
+	}
+
+	return bytes.ContainsAny(line, pattern), nil
 }
